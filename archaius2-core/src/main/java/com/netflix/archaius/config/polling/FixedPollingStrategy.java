@@ -43,22 +43,13 @@ public class FixedPollingStrategy implements PollingStrategy {
     
     @Override
     public Future<?> execute(final Runnable callback) {
-        while (true) {
-            try {
-                callback.run();
-                break;
-            } 
-            catch (Exception e) {
-                try {
-                    LOG.warn("Fail to poll the polling source", e);
-                    units.sleep(interval);
-                } 
-                catch (InterruptedException e1) {
-                    Thread.currentThread().interrupt();
-                    return Futures.immediateFailure(e);
-                }
-            }
+        try {
+            callback.run();
         }
+        catch (Exception e) {
+            LOG.warn("Fail to poll the polling source", e);
+        }
+
         return executor.scheduleWithFixedDelay(new Runnable() {
             @Override
             public void run() {
@@ -75,5 +66,5 @@ public class FixedPollingStrategy implements PollingStrategy {
     public void shutdown() {
         executor.shutdown();
     }
-
 }
+
